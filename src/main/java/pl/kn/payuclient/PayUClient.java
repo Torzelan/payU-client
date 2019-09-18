@@ -1,12 +1,9 @@
 package pl.kn.payuclient;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import pl.kn.payuclient.model.AuthorizationResponse;
@@ -15,18 +12,15 @@ import pl.kn.payuclient.model.OrderResponse;
 
 import java.util.Objects;
 
-@Service
 public class PayUClient {
 
-    private final RestTemplate restTemplate;
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${payU.prodLocation}")
-    private String prodLocation;
-
+    private String location;
     private String bearer;
 
-    public PayUClient(RestTemplateBuilder restTemplateBuilder) {
-        this.restTemplate = restTemplateBuilder.build();
+    public PayUClient(String location) {
+        this.location = location;
     }
 
     public void authorize(String clientId, String clientSecret) {
@@ -39,7 +33,7 @@ public class PayUClient {
         map.add("client_secret", clientSecret);
 
         var entity = new HttpEntity<>(map, headers);
-        var response = restTemplate.exchange(prodLocation + "pl/standard/user/oauth/authorize", HttpMethod.POST, entity, AuthorizationResponse.class);
+        var response = restTemplate.exchange(location + "pl/standard/user/oauth/authorize", HttpMethod.POST, entity, AuthorizationResponse.class);
         bearer = Objects.requireNonNull(response.getBody()).getAccess_token();
     }
 
@@ -48,6 +42,6 @@ public class PayUClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(bearer);
         var entity = new HttpEntity<>(orderRequest, headers);
-        return restTemplate.exchange(prodLocation + "api/v2_1/orders", HttpMethod.POST, entity, OrderResponse.class).getBody();
+        return restTemplate.exchange(location + "api/v2_1/orders", HttpMethod.POST, entity, OrderResponse.class).getBody();
     }
 }

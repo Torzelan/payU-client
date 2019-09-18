@@ -1,17 +1,13 @@
 package pl.kn.payuclient;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import pl.kn.payuclient.model.OrderRequest;
 import pl.kn.payuclient.model.Product;
 import pl.kn.payuclient.model.Settings;
 
-@SpringBootApplication
 public class PayUClientApplication {
 
     public static void main(String[] args) {
-        var ctx = SpringApplication.run(PayUClientApplication.class, args);
-        var payUClient = ctx.getBean(PayUClient.class);
+        var payUClient = new PayUClient("https://secure.payu.com/");
         payUClient.authorize("145227", "12f071174cb7eb79d4aac5bc2f07563f");
 
         var settings = new Settings();
